@@ -4,7 +4,6 @@ FIFO (First In First Out) caching
 '''
 
 
-from collections import OrderedDict
 from base_caching import BaseCaching
 
 
@@ -18,7 +17,7 @@ class FIFOCache(BaseCaching):
         Initializes the class
         '''
         super().__init__()
-        self.cache_data = OrderedDict()
+        self.stack = []
 
     def put(self, key, item):
         '''
@@ -33,11 +32,19 @@ class FIFOCache(BaseCaching):
         if key is None or item is None:
             return
 
-        if len(self.cache_data) > BaseCaching.MAX_ITEMS:
-            first_key, _ = self.cache_data.popitem(last=False)
-            print(f"DISCARD: {first_key}")
+        if key not in self.stack:
+            self.stack.append(key)
+        else:
+            self.reorder(key)
 
         self.cache_data[key] = item
+
+        if len(self.cache_data) > BaseCaching.MAX_ITEMS:
+            to_discard = self.stack[0]
+            if to_discard:
+                self.stack.remove(to_discard)
+                del self.cache_data[to_discard]
+                print("DISCARD: {}".format(to_discard))
 
     def get(self, key):
         '''
@@ -49,3 +56,16 @@ class FIFOCache(BaseCaching):
         Return: Valued represented by key
         '''
         return self.cache_data.get(key, None)
+
+    def reorder(self, key):
+        """
+        Assist function to move elements to end of list
+
+        Args:
+            key: Key to determine value to move
+
+        Return: Reorder List
+        """
+        if self.stack[-1] != key:
+            self.stack.remove(key)
+            self.stack.append(key)
