@@ -1,15 +1,15 @@
 #!/usr/bin/python3
 '''
-LIFO (Last In First Out) caching
+LRU (Least Recently Used) caching
 '''
 
 
 from base_caching import BaseCaching
 
 
-class LIFOCache(BaseCaching):
+class LRUCache(BaseCaching):
     '''
-    LIFOCache class using LIFO caching and inherits from BaseCaching
+    LRUCache class using LRU caching and inherits from BaseCaching
     '''
 
     def __init__(self):
@@ -35,7 +35,7 @@ class LIFOCache(BaseCaching):
         self.cache_data[key] = item
 
         if len(self.cache_data) > BaseCaching.MAX_ITEMS:
-            to_discard = self.stack.pop()
+            to_discard = self.stack.pop(0)
             del self.cache_data[to_discard]
             print("DISCARD: {}".format(to_discard))
 
@@ -53,10 +53,10 @@ class LIFOCache(BaseCaching):
 
         Return: Valued represented by key
         '''
-        if key is None or key not in self.cache_data.keys():
-            return None
-
-        return self.cache_data.get(key)
+        value = self.cache_data.get(key, None)
+        if value is not None:
+            self.reorder(key=key)
+        return value
 
     def reorder(self, key):
         '''
