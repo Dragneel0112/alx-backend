@@ -40,7 +40,7 @@ def get_locale() -> str:
 def index() -> str:
     '''
     Default app route
-    
+
     Args: N/A
 
     Returns: HTML page
