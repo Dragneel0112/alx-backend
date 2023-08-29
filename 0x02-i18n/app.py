@@ -5,7 +5,8 @@ Basic Babel setup
 
 from typing import Dict, Union
 from flask import Flask, render_template, request, g
-from flask_babel import Babel
+from flask_babel import Babel, format_datetime
+import pytz
 
 
 users = {
@@ -65,12 +66,35 @@ def get_locale() -> str:
 
     Returns: Language best match to config
     '''
-    locale = request.args.get('locale', None)
-
-    if locale and locale in app.config['LANGUAGES']:
+    queries = request.query_string.decode('utf-8').split('&')
+    query_table = dict(map(
+        lambda x: (x if '=' in x else '{}='.format(x)).split('='),
+        queries,
+    ))
+    locale = query_table.get('locale', '')
+    if locale in app.config["LANGUAGES"]:
         return locale
+    user_details = getattr(g, 'user', None)
+    if user_details and user_details['locale'] in app.config["LANGUAGES"]:
+        return user_details['locale']
+    header_locale = request.headers.get('locale', '')
+    if header_locale in app.config["LANGUAGES"]:
+        return header_locale
+    return app.config['BABEL_DEFAULT_LOCALE']
 
-    return request.accept_languages.best_match(app.config['LANGUAGES'])
+
+@babel.timezoneselector
+def get_timezone() -> str:
+    '''
+    Obtains the timezone
+    '''
+    timezone = request.args.get('timezone', '').strip()
+    if not timezone and g.user:
+        timezone = g.user['timezone']
+    try:
+        return pytz.timezone(timezone).zone
+    except pytz.exceptions.UnknownTimeZoneError:
+        return app.config['BABEL_DEFAULT_TIMEZONE']
 
 
 @app.route('/')
@@ -82,7 +106,8 @@ def index() -> str:
 
     Returns: HTML page
     '''
-    return render_template("5-index.html")
+    g.time = format_datetime()
+    return render_template("index.html")
 
 
 if __name__ == "__main__":

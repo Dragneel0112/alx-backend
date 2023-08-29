@@ -38,7 +38,8 @@ def before_request() -> None:
     '''
     Executes before requets and performs routines
     '''
-    g.user = get_user()
+    user = get_user()
+    g.user = user
 
 
 def get_user() -> Union[Dict, None]:
