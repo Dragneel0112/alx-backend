@@ -1,3 +1,4 @@
+#!/usr/bin/yarn dev
 /**
  * Connects to redis server
  */

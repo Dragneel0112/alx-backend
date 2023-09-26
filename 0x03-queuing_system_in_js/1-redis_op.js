@@ -1,3 +1,4 @@
+#!/usr/bin/yarn dev
 /**
  * Task 1: Sets a name and gets a value
  */
