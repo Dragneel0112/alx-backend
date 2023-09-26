@@ -1,4 +1,3 @@
-#!/usr/bin/yarn dev
 /**
  * Task 2: Set and get values using promise
  */
